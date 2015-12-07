@@ -1,0 +1,4 @@
+*.pyc
+tmp/*
+app.db
+db_respository/versions
