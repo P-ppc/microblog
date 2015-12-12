@@ -1,11 +1,13 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
-from forms import LoginForm, EditForm, PostForm
+from forms import LoginForm, EditForm, PostForm, SearchForm
 from models import User, Post
 from datetime import datetime
-from config import POSTS_PER_PAGE
-
+from config import POSTS_PER_PAGE, UPLOAD_FOLDER, UPLOAD_LOCAL_FOLDER
+import os
+import uuid
+from werkzeug.utils import secure_filename
 
 @app.route('/', methods = ['GET', 'POST'])
 @app.route('/index', methods = ['GET', 'POST'])
@@ -21,7 +23,6 @@ def index(page = 1):
         return redirect(url_for('index'))
 
     posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False)
-
     return render_template("index.html",
         title = 'Home',
         form = form,
@@ -40,7 +41,7 @@ def login():
         # make the user follow him/herself
         u = user.follow(user)
         if u is not None:
-            db.session.add(user.follow(user))
+            db.session.add(u)
             db.session.commit()        
 
         remember_me = False
@@ -53,8 +54,7 @@ def login():
     return render_template('login.html',
         title = 'Sign In',
         form = form,
-        providers = app.config['OPENID_PROVIDERS'])
-
+    )
     
 
 @app.route('/logout')
@@ -73,6 +73,7 @@ def before_request():
         g.user.last_seen = datetime.utcnow()
         db.session.add(g.user)
         db.session.commit()
+        g.search_form = SearchForm()
     
 @app.route('/user/<nickname>')
 @app.route('/user/<nickname>/<int:page>')
@@ -82,7 +83,7 @@ def user(nickname, page = 1):
     if user == None:
         flash('User ' + nickaname + ' not found.')
         return redirect(url_for('index'))
-    posts = user.posts.paginate(page, POSTS_PER_PAGE, False) 
+    posts = user.posts.order_by(Post.timestamp.desc()).paginate(page, POSTS_PER_PAGE, False) 
     return render_template('user.html', 
         user = user,
         posts = posts
@@ -150,3 +151,61 @@ def unfollow(nickname):
     db.session.commit()
     flash('You have stopped following ' + nickname + '.')
     return redirect(url_for('user', nickname = nickname))
+
+
+@app.route('/search', methods = ['POST'])
+@login_required
+def search():
+    if not g.search_form.validate_on_submit():
+        return redirect(url_for('index'))
+    return redirect(url_for('search_results', query = g.search_form.search.data))
+
+from config import MAX_SEARCH_RESULTS
+
+@app.route('/search_results/<query>')
+@login_required
+def search_results(query):
+    results = Post.query.filter(Post.body.ilike('%'+ query +'%')).order_by(-Post.timestamp).limit(MAX_SEARCH_RESULTS).all()
+    return render_template('search_results.html',
+        query = query,
+        results = results)
+
+@app.route('/ck_edit', methods = ['GET', 'POST'])
+@login_required
+def ck_edit():
+    return render_template('ck_edit.html')
+
+@app.route('/img_upload', methods = ['POST'])
+@login_required
+def img_upload():
+    callback = request.args['CKEditorFuncNum']
+    f = request.files['upload']
+    fname = str(uuid.uuid1()) + '.' +  str(f.filename.split('.')[1])
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.mkdir(UPLOAD_FOLDER)
+    f.save(os.path.join(UPLOAD_FOLDER, fname))
+    return_data = ""
+    return_data += "<script type=\"text/javascript\">"
+    return_data += "window.parent.CKEDITOR.tools.callFunction(" + callback + ",'" + '/' + UPLOAD_LOCAL_FOLDER + '/' + fname + "','')"
+    return_data += "</script>"
+    print return_data
+    return return_data
+
+@app.route('/post_blog', methods = ['POST'])
+@login_required
+def post_blog():
+    title = request.form.get('title', None)
+    body = request.form.get('content', None)
+    if body is not None and title is not None:
+        post = Post(body = body, title = title, timestamp = datetime.utcnow(), author = g.user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('index'))
+    return redirect(url_for('index'))
+
+@app.route('/show_blog/<int:id>', methods = ['GET'])
+@login_required
+def show_blog(id):
+    post = Post.query.get(id)
+    return render_template('show_blog.html', body = post.body)

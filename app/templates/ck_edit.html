@@ -1,0 +1,41 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+<script type="text/javascript">
+    CKEDITOR.replace('content', {toolbar: 'Full', skin: 'kama'});
+</script>
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        function consoleTest() {
+            var editor_data = CKEDITOR.instances.content.getData();
+            console.log(editor_data);
+        }
+        function initClearContent() {
+            $(".btn_clear").click(function() {
+                console.log('clear');            
+                CKEDITOR.instances.content.setData('');
+            });
+        }
+        initClearContent();
+    });
+</script>
+<h1>Say Something</h1>
+<form action="{{ url_for('post_blog') }}" method="post" role="form">
+    <div class="form-group">
+        <label for="title" >Title</label>
+        <input type="text" id="title" name="title" placeholder="Please input Title" class="form-control">
+    </div>
+
+    <div class="form-group">
+        <label for="content" >Content</label>
+        <textarea class="ckeditor" cols="80" id="content" name="content" rows="10">
+        </textarea>
+    </div>
+
+    <div class="form_group">
+        <input type="submit" class="btn btn-default" value="Submit">
+        <button type="button" class="btn btn-default btn_clear">Clear content</button>
+    <div>
+</form>
+{% endblock %}

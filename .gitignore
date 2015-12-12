@@ -2,3 +2,5 @@
 tmp/*
 app.db
 db_respository
+app/static/*.zip
+app/static/upload/*
