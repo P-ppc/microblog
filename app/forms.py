@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, BooleanField, TextAreaField
+from wtforms import StringField, BooleanField, TextAreaField, FileField
 from wtforms.validators import DataRequired, Length
 from app.models import User
 from app import db
@@ -38,6 +38,7 @@ class LoginForm(Form):
 
 class EditForm(Form):
     username = StringField('username', validators = [DataRequired()])
+    avatar = FileField('avatar')
     about_me = TextAreaField('about_me', validators = [Length(min = 0, max = 140)])
     
     def __init__(self, original_username, *args, **kwargs):

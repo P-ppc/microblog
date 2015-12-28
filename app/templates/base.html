@@ -32,6 +32,7 @@
 							<li><a href="{{ url_for('index') }}">Home</a></li>
 							{% if g.user.is_authenticated %}
 							<li><a href="{{ url_for('user', nickname = g.user.nickname) }}">Your Profile</a></li>
+							<li><a href="{{ url_for('ck_edit') }}">Say something</a></li>
 							<li><a href="{{ url_for('logout') }}">Logout</a></li>
 							{% endif %}
 						</ul>

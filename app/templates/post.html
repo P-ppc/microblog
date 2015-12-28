@@ -2,6 +2,6 @@
     <td>
         <h4><a href="{{ url_for('show_blog', id = post.id) }}">{{ post.title }}</a></h4>
         <br>
-        <a href="javascript:void(0)">{{ post.author.nickname }}</a>  post @ {{post.post_time() }}
+        <a href="{{ url_for('user', nickname = post.author.nickname) }}">{{ post.author.nickname }}</a>  post @ {{ post.post_time() }}
     </td>
 </tr>

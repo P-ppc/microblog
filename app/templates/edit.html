@@ -3,26 +3,21 @@
 
 {% block content %}
 <h1>Edit Your Profile</h1>
-<form action="" method="post" name="edit">
+<form action="" method="post" name="edit" role="form">
 	{{form.hidden_tag()}}
-	<table>
-		<tr>
-			<td>Your nickname:</td>
-			<td>
-				{{form.username(size = 24)}}
-				{% for error in form.errors.username %}
-				<br><span style="color: red;">[{{error}}]</span>
-				{% endfor %}
-			</td>
-		</tr>
-		<tr>
-			<td>About yourself:</td>
-			<td>{{form.about_me(cols = 32, rows = 4)}}</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td><input type="submit" value="Save Changes"></td>
-		</tr>
-	</table>
+	<div class="form-group">
+		<label for="nickname">Nickname: </label>
+		{{form.username(class="form-control", readonly="readonly")}}
+	</div>
+	<div class="form-group">
+		<label for="about_me">About yourself: </label>
+		{{form.about_me(class="form-control", cols=32, rows=4)}}
+	</div>
+	<div class="form-group">
+		<label for="avatar">Avatar: </label>
+		{{form.avatar()}}
+	</div>
+	<button class="btn btn-default" type="submit">Submit</button>
+	<button class="btn btn-default" >Cancel</button>
 </form>
 {% endblock %}

@@ -3,7 +3,13 @@
 
 {% block content %}
 <h1>Search results for "{{query}}":</h1>
-{% for post in results %}
-	{% include 'post.html' %}
+<!-- posts is a Paginate object -->
+<table class="table">
+<tbody>
+{% for post in posts %}
+    {% include 'post.html' %}
 {% endfor %}
+</tbody>
+</table>
+
 {% endblock %}

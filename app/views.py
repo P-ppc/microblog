@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
@@ -93,6 +95,7 @@ def user(nickname, page = 1):
 @login_required
 def edit():
     form = EditForm(g.user.nickname)
+    print form.avatar.data
     if form.validate_on_submit():
         g.user.nickname = form.username.data
         g.user.about_me = form.about_me.data
@@ -165,10 +168,11 @@ from config import MAX_SEARCH_RESULTS
 @app.route('/search_results/<query>')
 @login_required
 def search_results(query):
-    results = Post.query.filter(Post.body.ilike('%'+ query +'%')).order_by(-Post.timestamp).limit(MAX_SEARCH_RESULTS).all()
+    # FIXME 中文无法查询
+    posts = Post.query.filter(Post.title.ilike('%'+ query +'%')).order_by(-Post.timestamp).limit(MAX_SEARCH_RESULTS).all()
     return render_template('search_results.html',
         query = query,
-        results = results)
+        posts = posts)
 
 @app.route('/ck_edit', methods = ['GET', 'POST'])
 @login_required
