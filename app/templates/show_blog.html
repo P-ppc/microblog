@@ -2,6 +2,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-{{ body | safe }}
+<div class="panel panel-default">
+    <!-- title -->
+    <div class="panel-heading"><h4>{{ post.title }}<h4></div>
+    <!-- author -->
+    <ul class="list-group">
+        <li class="list-group-item" style="text-align:right">
+            <a href="{{ url_for('user', nickname = post.author.nickname) }}">{{ post.author.nickname }}</a> post @ {{ post.post_time() }}
+        </li>    
+    </ul>
+    <!-- body -->
+    <div class="panel-body">
+        <p>{{ post.body| safe }}</p>
+    </div>
+</div>
 {% endblock %}

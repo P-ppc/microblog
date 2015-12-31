@@ -38,7 +38,6 @@ class LoginForm(Form):
 
 class EditForm(Form):
     username = StringField('username', validators = [DataRequired()])
-    avatar = FileField('avatar')
     about_me = TextAreaField('about_me', validators = [Length(min = 0, max = 140)])
     
     def __init__(self, original_username, *args, **kwargs):

@@ -12,7 +12,9 @@ SECRET_KEY = 'you-will-never-guess'
 # pagination
 POSTS_PER_PAGE = 3
 
-WHOOSH_BASE = os.path.join(basedir, 'search.db')
 MAX_SEARCH_RESULTS = 50
+
 UPLOAD_FOLDER = os.path.join(basedir, 'app/static/upload')
 UPLOAD_LOCAL_FOLDER = 'static/upload'
+HEAD_FOLDER = 'app/static/head'
+HEAD_LOCAL_FOLDER = '/static/head'

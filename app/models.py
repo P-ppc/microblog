@@ -13,6 +13,7 @@ class User(db.Model):
     posts = db.relationship('Post', backref = 'author', lazy = 'dynamic')
     about_me = db.Column(db.String(280))
     last_seen = db.Column(db.DateTime)
+    avatar = db.Column(db.String(120))
     followed = db.relationship('User', 
         secondary = followers,
         primaryjoin = (followers.c.follower_id == id),
@@ -35,9 +36,6 @@ class User(db.Model):
             return unicode(self.id) # python 2
         except NameError:
             return str(self.id) # python 3
-    
-    def avatar(self):
-        return '/static/head/head.jpg'
     
     def follow(self, user):
         if not self.is_following(user):

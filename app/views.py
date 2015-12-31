@@ -6,10 +6,12 @@ from app import app, db, lm
 from forms import LoginForm, EditForm, PostForm, SearchForm
 from models import User, Post
 from datetime import datetime
-from config import POSTS_PER_PAGE, UPLOAD_FOLDER, UPLOAD_LOCAL_FOLDER
+from config import POSTS_PER_PAGE, UPLOAD_FOLDER, UPLOAD_LOCAL_FOLDER, HEAD_FOLDER, HEAD_LOCAL_FOLDER
 import os
 import uuid
 from werkzeug.utils import secure_filename
+import time
+
 
 @app.route('/', methods = ['GET', 'POST'])
 @app.route('/index', methods = ['GET', 'POST'])
@@ -83,7 +85,7 @@ def before_request():
 def user(nickname, page = 1):
     user = User.query.filter_by(nickname = nickname).first()
     if user == None:
-        flash('User ' + nickaname + ' not found.')
+        flash('User ' + nickname + ' not found.')
         return redirect(url_for('index'))
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(page, POSTS_PER_PAGE, False) 
     return render_template('user.html', 
@@ -95,8 +97,12 @@ def user(nickname, page = 1):
 @login_required
 def edit():
     form = EditForm(g.user.nickname)
-    print form.avatar.data
     if form.validate_on_submit():
+        f = request.files['head']
+        if f != None and f.filename != None and f.filename != "":
+            fname = str(int(time.time())) + f.filename
+            f.save(os.path.join(HEAD_FOLDER, fname))
+            g.user.avatar = os.path.join(HEAD_LOCAL_FOLDER, fname)
         g.user.nickname = form.username.data
         g.user.about_me = form.about_me.data
         db.session.add(g.user)
@@ -212,4 +218,4 @@ def post_blog():
 @login_required
 def show_blog(id):
     post = Post.query.get(id)
-    return render_template('show_blog.html', body = post.body)
+    return render_template('show_blog.html', post = post)
