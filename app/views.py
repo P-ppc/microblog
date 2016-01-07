@@ -14,6 +14,7 @@ import StringIO
 from utils import create_validate_code
 from forms import LoginForm, EditForm, SearchForm
 from sqlalchemy import desc
+import heapq
 
 @app.route('/', methods = ['GET', 'POST'])
 @app.route('/index', methods = ['GET', 'POST'])
@@ -22,9 +23,13 @@ from sqlalchemy import desc
 def index(page = 1):
     # 显示所有人的blog
     posts = Post.query.order_by(desc(Post.timestamp)).paginate(page, POSTS_PER_PAGE, False)
+    # 显示前5的followers排行
+    users = User.query.all()
+    top5 = heapq.nlargest(5, users, key = lambda u : u.followers.count())
     return render_template("index.html",
         title = 'Home',
-        posts = posts)
+        posts = posts,
+        top5 = top5)
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():

@@ -1,18 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Lastly Post</h1>
 
-<!-- posts is a Paginate object -->
-<table class="table">
-<tbody>
-{% for post in posts.items %}
-    {% include 'post.html' %}
-{% endfor %}
-</tbody>
-</table>
+<div class="col-md-8">
+    <h1>Lastly Post</h1>
+    <!-- posts is a Paginate object -->
+    <table class="table">
+    <tbody>
+    {% for post in posts.items %}
+        {% include 'post.html' %}
+    {% endfor %}
+    </tbody>
+    </table>
 
-{% if posts and posts.items %}
-    {% include 'paginator.html'%}
-{% endif %}
+    {% if posts and posts.items %}
+        {% include 'paginator.html'%}
+    {% endif %}
+</div>
+
+<div class="col-md-4">
+    <h1>Stars</h1>
+    <ul class="list-group">
+        <!-- TODO 循环遍历 -->
+        {% if top5 %}
+            {% for user in top5 %}
+                <li class="list-group-item" style="list-style-type:none;">
+                        {{ loop.index }} : <a href="{{ url_for('user', nickname = user.nickname) }}">{{ user.nickname }}</a>
+                        <span style="float:right">
+                            {{ user.followers.count() }} followers
+                        </span>
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</div>
 
 {% endblock %}
