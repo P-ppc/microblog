@@ -30,10 +30,10 @@
 				<td>
 				{% if user.id == g.user.id %}
 					<a href="{{url_for('edit')}}">Edit</a>
-				{% elif not g.user.is_followeing(user) %}
-					<a href="{{url_for('follow', nickname = user.nickname)}}">Unfollow</a>
+				{% elif not g.user.is_following(user) %}
+					<a href="{{url_for('follow', nickname = user.nickname)}}">Follow</a>
 				{% else %}
-					<a href="{{url_for('unfollow', nickname = user.nickname)}}">Follow</a>
+					<a href="{{url_for('unfollow', nickname = user.nickname)}}">unFollow</a>
 				{% endif %}
 				</td>
 			</tr>

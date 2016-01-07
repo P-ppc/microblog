@@ -26,6 +26,19 @@
     </div>
 
     <div class="form-group">
+        <label for="code" class="col-md-1 control-label">Code</label>
+        <div class="col-md-4">
+            <div class="form-inline">
+                <img src="{{ url_for('code') }}" alt="code" id="code" title="点击更换验证码">
+                {{ form.code(maxlength=10, placeholder="Code", class="form-control", id="code", style="float: right")}}
+            </div>
+            {% for error in form.code.errors %}
+                <span style="color:red">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="form-group">
         <div class="col-md-offset-1 col-md-4">
             <p>{{ form.remember_me}} Rember Me</p>
         </div>
@@ -37,5 +50,10 @@
         </div>
     </div>
 </form> 
+<script type="text/javascript">
+    $("#code").click(function() {
+        $("#code").attr('src', "{{ url_for('code') }}?" + Math.random());
+    });
+</script>
 {% endblock %}
 

@@ -7,11 +7,22 @@ from app import db
 class LoginForm(Form):
     username = StringField('username', validators = [DataRequired()])
     email = StringField('email', validators = [DataRequired()])
+    code = StringField('code', validators = [DataRequired()])
     remember_me = BooleanField('remember_me', default = False)
     
+    def __init__(self, g_code):
+        Form.__init__(self)
+        self.g_code = g_code
+
     def validate(self):
         if not Form.validate(self):
             return False
+
+        # for code
+        if self.g_code == '' or self.g_code != self.code.data:
+            self.code.errors.append('Wrong code!')
+            return False
+
         user_by_name = User.query.filter_by(nickname = self.username.data).first()
         user_by_email = User.query.filter_by(email = self.email.data).first()
         if user_by_name is None and user_by_email is None:
@@ -54,10 +65,6 @@ class EditForm(Form):
             self.username.errors.append('This username is already in use.')
             return False
         return True
-
-
-class PostForm(Form):
-    post = StringField('post', validators = [DataRequired()])
 
 class SearchForm(Form):
     search = StringField('search', validators = [DataRequired()])

@@ -3,7 +3,6 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
-from forms import LoginForm, EditForm, PostForm, SearchForm
 from models import User, Post
 from datetime import datetime
 from config import POSTS_PER_PAGE, UPLOAD_FOLDER, UPLOAD_LOCAL_FOLDER, HEAD_FOLDER, HEAD_LOCAL_FOLDER
@@ -11,25 +10,20 @@ import os
 import uuid
 from werkzeug.utils import secure_filename
 import time
-
+import StringIO
+from utils import create_validate_code
+from forms import LoginForm, EditForm, SearchForm
+from sqlalchemy import desc
 
 @app.route('/', methods = ['GET', 'POST'])
 @app.route('/index', methods = ['GET', 'POST'])
 @app.route('/index/<int:page>', methods = ['GET', 'POST'])
 @login_required
 def index(page = 1):
-    form = PostForm()
-    if form.validate_on_submit():
-        post = Post(body = form.post.data, timestamp = datetime.utcnow(), author = g.user)
-        db.session.add(post)
-        db.session.commit()
-        flash('Your post is now live!')
-        return redirect(url_for('index'))
-
-    posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False)
+    # 显示所有人的blog
+    posts = Post.query.order_by(desc(Post.timestamp)).paginate(page, POSTS_PER_PAGE, False)
     return render_template("index.html",
         title = 'Home',
-        form = form,
         posts = posts)
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -37,7 +31,8 @@ def login():
     if g.user is not None and g.user.is_authenticated:
         return redirect(url_for('index'))
 
-    form = LoginForm()
+    form = LoginForm(session.get('code', '')) if request.method == 'POST' else LoginForm('') 
+
     if form.validate_on_submit():
         session['remember_me'] = form.remember_me.data
         user = User.query.filter_by(nickname = form.username.data).first()
@@ -219,3 +214,16 @@ def post_blog():
 def show_blog(id):
     post = Post.query.get(id)
     return render_template('show_blog.html', post = post)
+
+@app.route('/code')
+def code():
+    code_img, strs = create_validate_code()
+    session['code'] = strs
+
+    buf = StringIO.StringIO()
+    code_img.save(buf, 'JPEG', quality = 70)
+
+    buf_str = buf.getvalue()
+    response = app.make_response(buf_str)
+    response.headers['Content-type'] = 'image/jpeg'
+    return response

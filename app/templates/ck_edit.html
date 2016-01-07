@@ -6,6 +6,7 @@
 </script>
 {% block content %}
 <script type="text/javascript">
+    
     $(document).ready(function() {
         function consoleTest() {
             var editor_data = CKEDITOR.instances.content.getData();
@@ -18,13 +19,24 @@
             });
         }
         initClearContent();
+        function initSubmitForm() {
+            $(".btn_submit").click(function() {
+                if ($("#title").val() != "") {
+                    $("#blogForm").submit();
+                } else {
+                    console.log("Please input title!");
+                    $("#title").parent().append("<span style='color: red'>Your must input title!</span>");
+                }
+            });
+        }
+        initSubmitForm();
     });
 </script>
 <h1>Say Something</h1>
-<form action="{{ url_for('post_blog') }}" method="post" role="form">
+<form action="{{ url_for('post_blog') }}" method="post" role="form" id="blogForm">
     <div class="form-group">
         <label for="title" >Title</label>
-        <input type="text" id="title" name="title" placeholder="Please input Title" class="form-control">
+        <input type="text" id="title" name="title" placeholder="Please input Title" required class="form-control">
     </div>
 
     <div class="form-group">
@@ -34,7 +46,7 @@
     </div>
 
     <div class="form_group">
-        <input type="submit" class="btn btn-default" value="Submit">
+        <input type="submit" class="btn btn-default btn_submit" value="Submit" >
         <button type="button" class="btn btn-default btn_clear">Clear content</button>
     <div>
 </form>
